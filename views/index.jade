@@ -1,0 +1,41 @@
+header
+    div#title Twitter streaming console
+div#main
+    div#console
+
+footer
+    div#traffic
+
+script
+    function init() {
+        var socket = io.connect('http://localhost:3000/');
+        var total = 0;
+        var cnt = 0;
+        socket.on('tweet', function(json) {
+            total++;
+            try {
+                var tweet = jQuery.parseJSON(json);
+                if (!tweet) {
+                    return;
+                }
+                var user = tweet.user;
+                if (user && user.lang == 'ja') {
+                    var img = $('<img>').attr('src', user.profile_image_url);
+                    var icon = $('<div>').addClass('icon').append(img);
+                    var text  = $('<div>').addClass('text').append(tweet.text);
+                    var div = $('<div>').attr('id', 'tweet' + cnt).addClass('tweet');
+                    div.append(icon).append(text);
+                    $('#console').prepend(div);
+                    cnt++;
+                    var delcnt = cnt - 50;
+                    if (delcnt >= 0) {
+                        $('#tweet' + delcnt).remove();
+                    }
+                }
+            } catch (err) {
+                console.log(err);
+            }
+            $('#traffic').text(cnt + '/' + total);
+        });
+    }
+    $(init);
